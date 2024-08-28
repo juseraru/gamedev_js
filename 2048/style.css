@@ -1,0 +1,114 @@
+h1 {
+    text-align: center;
+}
+
+h2 {
+    text-align: center;
+}
+
+#reset {
+    width: 70px;
+    height: 20px;
+
+    display: block;
+    /* margin has 2 arg first is vert second horiz */
+    margin: 20px auto; 
+}
+
+#board {
+    width: 500px;
+    height: 500px;
+    background-color: #bbada0;/*  cdc1b5 */
+    margin: 0 auto;
+    border: 5px solid #bbada0;
+    
+    display: flex;
+    /* allows div inside boards to wrap */
+    flex-wrap: wrap; 
+    justify-content: center;
+    align-items: center;
+}
+
+/* this is done so the divs wont change size
+when text is added, with grid, divs expands. */
+
+.empty {
+    /* we use 5px on borders so we remove 
+    10 px from each tile(empty) 
+    they look like making the gaps of tiles*/
+    width: 115px;
+    height: 115px;
+    border: 5px solid #bbada0;
+    background-color: #cdc1b5;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 3.5em;
+    /* font-weight: bold; */
+}
+
+.x2 {
+    background-color: #eee4da;
+    color: #727371;
+}
+
+.x4 {
+    background-color: #ece0ca;
+    color: #727371;
+}
+
+.x8 {
+    background-color: #f4b17a;
+    color: white;
+}
+
+.x16 {
+    background-color: #f59575;
+    color: white;
+}
+
+.x32 {
+    background-color: #f57c5f;
+    color: white;
+}
+
+.x64 {
+    background-color: #f65d3b;
+    color: white;
+}
+
+.x128 {
+    background-color: #edce71;
+    color: white;
+}
+
+.x256 {
+    background-color: #edcc63;
+    color: white;
+}
+
+.x512 {
+    background-color: #edc651;
+    color: white;
+}
+
+.x1024 {
+    background-color: #eec744;
+    color: white;
+}
+
+.x2048 {
+    background-color: #ecc230;
+    color: white;
+}
+
+.x4096 {
+    background-color: #fe3d3d;
+    color: white;
+}
+
+.other {
+    background-color: rgb(55, 55, 55);
+    color: white;
+}

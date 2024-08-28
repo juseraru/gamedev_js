@@ -1,0 +1,40 @@
+h1 {
+    text-align: center;
+}
+
+h2 {
+    text-align: center;
+}
+
+#board {
+    width: 630px;
+    height: 540px;
+    background-color: gray;
+    border: 10px solid black;
+
+    padding: 10px;
+    margin: auto;
+
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    /*grid-template-rows: repeat(6, 1fr);*/
+    gap: 10px;
+}
+
+.circ {
+    width: 100%;
+    border: 5px solid black;
+    background-color: White;
+
+    border-radius: 50%;
+    box-sizing: border-box;
+}
+
+#reset {
+    width: 70px;
+    height: 20px;
+
+    display: block;
+    /* margin has 2 arg first is vert second horiz */
+    margin: 20px auto; 
+}

@@ -1,0 +1,134 @@
+h1{
+    text-align: center;
+    text-transform: uppercase;
+}
+
+#button-container{
+    height: 50px;
+    width: 800px;
+
+    margin: 0px auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.button{
+    width: 180px;
+    font-size: 1.2em;
+    background-color: rgb(2, 200, 200);
+    margin: 0px auto;
+    border-radius: 20px;
+    border: 0cap;
+    display: block;
+}
+
+/* #board-container{ 
+    background-image: url(images/background/China_PreRegistration_KV.jpg);
+    background-repeat: no-repeat;
+    background-size: 100%;
+} */
+
+.board {
+    margin: 30px auto;
+    padding: 35px;
+    /* background-color: wheat; */
+
+    display: flex;
+    flex-wrap: wrap;
+    justify-items: center;
+    align-items: center;
+
+    position: relative;
+
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.card{
+    width: 98px;
+    height: 178px;
+    margin: 7px 7px;
+    border: 1px solid black;
+    border-radius: 20px;
+    text-align: center;
+    position: relative;
+    transform-style: preserve-3d;
+    /* overflow: hidden; */
+
+    /* here goes the configuration to apply the rotation transformation  */
+    transition-property: transform;
+    transition-duration: 0.7s;
+    transition-timing-function: ease-out;
+    /* transition-delay: 0.5s; */
+    /* opacity: 0; */
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.card-flipped {
+    transform: rotateY(180deg);
+}
+
+.card-out {
+    transform: scale(0.1,0.1);
+    opacity: 0;
+    transition-property: transform, opacity;
+    transition-duration: 0.7s;
+    transition-timing-function: ease-in-out;
+}
+
+.front{
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    border-radius: 20px;
+    background-color: rgb(219, 4, 4);
+    /* background-color: conic-gradient(red, red, red);; */
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: contain;
+
+    /* color: black; */
+    backface-visibility: hidden;
+}
+
+.back{
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    border-radius: 20px;
+
+    background-color: rgba(248, 246, 246, 0.39);
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    
+    transform: rotateY(180deg);
+    backface-visibility: hidden;
+}
+
+/* @keyframes tilt-shaking {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(5deg); }
+    50% { transform: rotate(0deg); }
+    75% { transform: rotate(-5deg); }
+    100% { transform: rotate(0deg); }
+}
+
+.card-flipped .card-shake {
+    animation-name: tilt-shaking;
+    animation-duration: 1.0s;
+    animation-timing-function: ease-in-out;
+} */
+
+
+
+#reset {
+    width: 70px;
+    height: 30px;
+    font-size: 1.3em;
+    display: block;
+    /* margin has 2 arg first is vert - horiz */
+    margin: 20px auto; 
+}
