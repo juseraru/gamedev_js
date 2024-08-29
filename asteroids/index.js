@@ -101,14 +101,57 @@ function randomInt(min, max) {
     return Math.floor(Math.random() * (maxFloored - minCeiled + 1) + minCeiled); 
 }
 
-class particleSystem{
-    constructor(x,y){
+class Particle{
+    constructor(x,y,orientation){
+        this.x = x;
+        this.y = y;
+        this.orientation = orientation + Math.PI;
+        this.vx = randomInt(1,3)/5;
+        this.vy = 2*Math.random() - 1;
+        this.radius = 3;
+        this.alpha = 1;
+        this.valpha = 0.03;
+    }
 
+    draw(){
+        if(this.alpha>0.94){
+            ctx.fillStyle = 'white';
+        }else if(this.alpha>0.72){
+            ctx.fillStyle = 'yellow';
+        }else if(this.alpha>0.62){
+            ctx.fillStyle = 'orange';
+        }else if(this.alpha>0.2){
+            ctx.fillStyle = 'red';
+        }else {
+            ctx.fillStyle = 'grey';
+        }
+        
+        ctx.globalAlpha = this.alpha;
+        ctx.beginPath()
+        ctx.arc(this.x,this.y,this.radius,0,2*Math.PI)
+        ctx.fill()
+        ctx.closePath()
+        // ctx.restore()
+
+        ctx.globalAlpha = 1;
+    }
+
+    update(){
+        let vx= this.vx * Math.cos(this.orientation) -
+                    this.vy * Math.sin(this.orientation);
+        this.x += vx * this.alpha;
+        let vy = this.vx * Math.sin(this.orientation) +
+                    this.vy * Math.cos(this.orientation);
+        this.y += vy * this.alpha;
+
+        this.alpha -= this.valpha;
+
+        this.draw();
     }
 }
 
 class Player{
-    constructor(x,y,vx=0,vy=0,rotation=3*Math.PI/2, omega = 0){
+    constructor(x,y,vx=0,vy=0,rotation=-Math.PI/2, omega = 0){
         this.x = x;
         this.y = y;
         this.vx = vx;
@@ -123,6 +166,7 @@ class Player{
         this.radius_collision = 8;
 
         this.bullets = [];
+        this.particles = [];
     }
 
     draw(){
@@ -134,19 +178,19 @@ class Player{
         ctx.translate(-1*(this.x + this.w/2), -1*(this.y+this.h/2))
         ctx.moveTo(this.x + this.w, this.y + this.h/2);
         ctx.lineTo(this.x, this.y);
-        ctx.lineTo(this.x + 1*this.w/4, this.y + this.h/2);
+        ctx.lineTo(this.x + this.w/4, this.y + this.h/2); //particle x,y
         ctx.lineTo(this.x, this.y + this.h);
         ctx.lineTo(this.x  + this.w, this.y+this.h/2);
         ctx.closePath();
         ctx.fill();
         ctx.restore();
 
-        ctx.fillStyle = 'red';
-        ctx.beginPath();
-        ctx.arc(this.x+this.w/2,this.y+this.h/2,
-            this.radius_collision*.8,0,2*Math.PI);
-        ctx.closePath()
-        ctx.fill()
+        // ctx.fillStyle = 'red';
+        // ctx.beginPath();
+        // ctx.arc(this.x+this.w/2,this.y+this.h/2,
+        //     this.radius_collision*.8,0,2*Math.PI);
+        // ctx.closePath()
+        // ctx.fill()
     }
 
     update(){
@@ -173,16 +217,33 @@ class Player{
                 this.bullets.splice(b,1);
             }
         }
-    
+        
+        this.particleSystem()
     }
 
     shoot(){
         let b = new Bullet(
                         this.x + this.w/2 + (this.w/2)*Math.cos(this.rotation), 
-                        this.y + this.h/2 + (this.w/2)*Math.sin(this.rotation), 
+                        this.y + this.h/2 + (this.h/2)*Math.sin(this.rotation), 
                         this.rotation
                     )
         this.bullets.push(b)
+    }
+
+    particleSystem(){
+        if(playerInput.w.pressed ){ //&& Math.random()>0.2
+            let x = this.x + this.w/2;
+            let y = this.y + this.h/2;
+            x -= this.w/3 * Math.cos(this.rotation);
+            y -= this.w/3 * Math.sin(this.rotation);            
+            let p = new Particle(x,y,this.rotation);
+            this.particles.push(p)
+        }
+        if (this.particles.length === 0) return
+        for (let i=this.particles.length-1;i>=0;i--){
+            this.particles[i].update();
+            if (this.particles[i].alpha < 0) this.particles.splice(i,1)
+        }
     }
 }
 
@@ -236,12 +297,12 @@ class Asteroid{
 
     draw(){
         // collision area
-        ctx.strokeStyle = 'red';
-        ctx.lineWidth = 2;
-        ctx.beginPath()
-        ctx.arc(this.x,this.y,this.radius,0,2*Math.PI)
-        ctx.closePath()
-        ctx.stroke()
+        // ctx.strokeStyle = 'red';
+        // ctx.lineWidth = 2;
+        // ctx.beginPath()
+        // ctx.arc(this.x,this.y,this.radius,0,2*Math.PI)
+        // ctx.closePath()
+        // ctx.stroke()
         // visualization area
         ctx.save()
         ctx.translate(this.x, this.y);
