@@ -3,7 +3,28 @@ const ctx = canvas.getContext('2d');
 const LINEAR_SPEED = 1.7;
 const ANGULAR_SPEED = 0.015;
 const FRICTION = 0.987;
+const ASTEROID_JAGG = 0.2;
+const playerInput = {
+    w:{
+        pressed : false
+    },
+    a:{
+        pressed : false
+    },
+    d:{
+        pressed : false
+    },
+    s:{
+        pressed : false
+    },
+    space:{
+        pressed : false
+    }
+}
+
 let timePassed = 0, lastTime, fps;
+
+let isPause=false;
 
 canvas.width = window.innerWidth;
 canvas.height = 860;
@@ -11,7 +32,6 @@ canvas.height = 860;
 window.addEventListener('keydown', (event)=>{
     switch(event.code){
         case 'KeyW':
-            console.log(event.repeat)
             // console.log('w pressed')
             playerInput.w.pressed = true
             break;
@@ -31,13 +51,14 @@ window.addEventListener('keydown', (event)=>{
             if (event.repeat){
                 return;
             }
-            console.log('space bar pressed')
+            // console.log('space bar pressed')
             playerInput.space.pressed = true
             break;
     }
 })
 
 window.addEventListener('keyup', (event)=>{
+    // console.log(event.code)
     switch(event.code){
         case 'KeyW':
             // console.log('w up')
@@ -62,6 +83,15 @@ window.addEventListener('keyup', (event)=>{
             // console.log('space bar up')
             playerInput.space.pressed = false
             break;
+        case 'Escape':
+            // console.log(isPause)
+            canvas.style.opacity = 1;
+            isPause = !isPause;
+            if (!isPause){
+                canvas.style.opacity = 1;
+                gameLoop()
+            }
+            break;
     }
 })
 
@@ -69,6 +99,12 @@ function randomInt(min, max) {
     const minCeiled = Math.ceil(min);
     const maxFloored = Math.floor(max);
     return Math.floor(Math.random() * (maxFloored - minCeiled + 1) + minCeiled); 
+}
+
+class particleSystem{
+    constructor(x,y){
+
+    }
 }
 
 class Player{
@@ -108,7 +144,7 @@ class Player{
         ctx.fillStyle = 'red';
         ctx.beginPath();
         ctx.arc(this.x+this.w/2,this.y+this.h/2,
-            this.radius_collision,0,2*Math.PI);
+            this.radius_collision*.8,0,2*Math.PI);
         ctx.closePath()
         ctx.fill()
     }
@@ -121,9 +157,9 @@ class Player{
         this.x += this.vx;
         this.y += this.vy;
         this.x = Math.max(this.radius_collision/4,
-                        Math.min(this.x,
-                            canvas.width - 4*this.radius_collision)
-                    )
+            Math.min(this.x,
+                canvas.width - 4*this.radius_collision)
+        )
         this.y = Math.max(this.radius_collision/4,
             Math.min(this.y,
                 canvas.height - 4*this.radius_collision)
@@ -180,26 +216,58 @@ class Bullet{
 }
 
 class Asteroid{
-    constructor(x, y, radius, rotation=0, speed=0, breaks=3){
+    constructor(x, y, radius, rotation, speed, breaks, num_vertices){
         this.x = x;
         this.y = y;
         this.rotation = rotation;
         this.speed = speed;
         this.radius = radius;
-        
         this.breaks = breaks;
+
+        this.num_vertices = num_vertices;
+        this.offset = [];
+        for (let i=0;i<this.num_vertices;i++){
+            this.offset.push( (2*ASTEROID_JAGG*Math.random())
+                    + 1 - ASTEROID_JAGG); 
+        }
+        this.omega = (ANGULAR_SPEED*Math.random()) - ANGULAR_SPEED/2;
+        this.orientation = 0;
     }
 
     draw(){
-        // ctx.save()
-        ctx.strokeStyle = 'white';
+        // collision area
+        ctx.strokeStyle = 'red';
         ctx.lineWidth = 2;
         ctx.beginPath()
         ctx.arc(this.x,this.y,this.radius,0,2*Math.PI)
-        // ctx.fillText(this.speed.toString(),this.x,this.y)
+        ctx.closePath()
+        ctx.stroke()
+        // visualization area
+        ctx.save()
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.orientation);
+        ctx.translate(-1*this.x, -1*this.y)
+        ctx.strokeStyle = 'white'
+        ctx.beginPath()
+        ctx.moveTo(
+            this.x + this.radius * Math.cos(0) * this.offset[0],
+            this.y + this.radius * Math.sin(0) * this.offset[0],
+        )
+        let x, y;
+        for (let i=1;i<this.num_vertices;i++){
+            x = this.x + this.radius * Math.cos(i*2*Math.PI/this.num_vertices) 
+                    * this.offset[i];
+            y = this.y + this.radius * Math.sin(i*2*Math.PI/this.num_vertices) 
+                    * this.offset[i];
+            ctx.lineTo(x,y)
+        }
+        ctx.lineTo(
+            this.x + this.radius * Math.cos(0) * this.offset[0],
+            this.y + this.radius * Math.sin(0) * this.offset[0],
+        )
         ctx.stroke()
         ctx.closePath()
-        // ctx.restore()
+        ctx.restore()
     }
 
     update(){
@@ -208,11 +276,13 @@ class Asteroid{
         this.x += vx;
         this.y += vy;
 
+        this.orientation += this.omega;
+
         this.draw();
     }
 
     static addAsteroid(){
-        let x,y,radius,rotation,speed,breaks;
+        let x,y,radius,rotation,speed,breaks,num_v;
         switch(randomInt(0,3)){
             case 0: //east
                 x = canvas.width;
@@ -240,37 +310,22 @@ class Asteroid{
                 radius = 15;
                 speed = 4;
                 breaks = 1;
+                num_v = 8;
                 break;
             case 1: //medium
                 radius = 50;
                 speed = 2.5;
                 breaks = 2;
+                num_v = 14;
                 break;
             case 2: //big
                 radius = 75;
                 speed = 1;
                 breaks = 3;
+                num_v = 24;
                 break;
         }
-        return new Asteroid(x,y,radius,rotation,speed,breaks)
-    }
-}
-
-playerInput = {
-    w:{
-        pressed : false
-    },
-    a:{
-        pressed : false
-    },
-    d:{
-        pressed : false
-    },
-    s:{
-        pressed : false
-    },
-    space:{
-        pressed : false
+        return new Asteroid(x,y,radius,rotation,speed,breaks,num_v)
     }
 }
 
@@ -282,6 +337,9 @@ const player = new Player(
 let asteroids = []
 
 const gameLoop = function(timeStamp){
+    if(isPause)
+        return;
+    // console.log(timeStamp, lastTime)
     let delta = (timeStamp - lastTime)/1000;
     lastTime = timeStamp;
     if(lastTime && delta) {
@@ -292,8 +350,8 @@ const gameLoop = function(timeStamp){
 
     requestAnimationFrame(gameLoop);
     ctx.fillStyle = 'black';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    // ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     
     ctx.fillStyle = "white";
     ctx.font = "18px serif";
@@ -314,8 +372,11 @@ const gameLoop = function(timeStamp){
     }
     player.update();
 
-    if (Math.abs(timePassed-1) < 0.001){
+    // console.log(Math.abs(timePassed-1.000))
+    if (timePassed>1.000){
         asteroids.push(Asteroid.addAsteroid());
+        // asteroids.push(Asteroid.addAsteroid());
+        // console.log('new aste')
         timePassed = 0;
     }
     for (a in asteroids){
@@ -324,7 +385,7 @@ const gameLoop = function(timeStamp){
             asteroids[a].y < 0 || canvas.height < asteroids[a].y){
                 asteroids.splice(a,1);
         }
-        console.log(asteroids)
+        // console.log(asteroids)
     }
     if(asteroids.length === 0){
         for (let j=0; j<3; j++){
