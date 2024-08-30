@@ -1,5 +1,9 @@
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
+
+canvas.width = window.innerWidth;
+canvas.height = 860;
+
 const LINEAR_SPEED = 1.7;
 const ANGULAR_SPEED = 0.015;
 const FRICTION = 0.987;
@@ -25,9 +29,6 @@ const playerInput = {
 let timePassed = 0, lastTime, fps;
 
 let isPause=false;
-
-canvas.width = window.innerWidth;
-canvas.height = 860;
 
 window.addEventListener('keydown', (event)=>{
     switch(event.code){
@@ -101,34 +102,51 @@ function randomInt(min, max) {
     return Math.floor(Math.random() * (maxFloored - minCeiled + 1) + minCeiled); 
 }
 
+function randomFloat(min, max, t=null) {
+    t = t ? t : Math.random();
+    return (1.0-t)*min + t*max; 
+}
+
 class Particle{
     constructor(x,y,orientation){
         this.x = x;
         this.y = y;
         this.orientation = orientation + Math.PI;
-        this.vx = randomInt(1,3)/5;
-        this.vy = 2*Math.random() - 1;
-        this.radius = 3;
+        this.vx = randomInt(1,3)/2;
+        this.vy = Math.random() - 1/2;
+        
+        this.radius = 6;
+        this.perc_radius = 0.35;
         this.alpha = 1;
-        this.valpha = 0.03;
+        this.valpha = randomFloat(1/100,1/255);
     }
 
     draw(){
-        if(this.alpha>0.94){
-            ctx.fillStyle = 'white';
-        }else if(this.alpha>0.72){
-            ctx.fillStyle = 'yellow';
-        }else if(this.alpha>0.62){
-            ctx.fillStyle = 'orange';
-        }else if(this.alpha>0.2){
-            ctx.fillStyle = 'red';
+        if(this.alpha>0.94){ //0.94
+            // ctx.fillStyle = 'white';
+            ctx.fillStyle = 'rgb(255, 255, 255)'
+        }else if(this.alpha>0.80){ //0.72
+            // ctx.fillStyle = 'yellow';
+            ctx.fillStyle = 'rgb(255, 216, 0)'
+        }else if(this.alpha>0.70){ //0.62
+            // ctx.fillStyle = 'orange';
+            ctx.fillStyle = 'rgb(255, 116, 14)'
+        }else if(this.alpha>0.50){ //0.2
+            // ctx.fillStyle = 'red';
+            ctx.fillStyle = 'rgb(217, 14, 14)';
         }else {
-            ctx.fillStyle = 'grey';
+            // ctx.fillStyle = 'grey';
+            ctx.fillStyle = 'rgb(55,55,55)'
         }
         
         ctx.globalAlpha = this.alpha;
         ctx.beginPath()
-        ctx.arc(this.x,this.y,this.radius,0,2*Math.PI)
+        let radius = randomFloat(
+            this.radius*this.perc_radius,
+            this.radius,
+            this.alpha,
+        )
+        ctx.arc(this.x,this.y,radius,0,2*Math.PI)
         ctx.fill()
         ctx.closePath()
         // ctx.restore()
@@ -139,10 +157,10 @@ class Particle{
     update(){
         let vx= this.vx * Math.cos(this.orientation) -
                     this.vy * Math.sin(this.orientation);
-        this.x += vx * this.alpha;
+        this.x += (vx + randomFloat(-0.2,0.2)) * this.alpha;
         let vy = this.vx * Math.sin(this.orientation) +
                     this.vy * Math.cos(this.orientation);
-        this.y += vy * this.alpha;
+        this.y += (vy + randomFloat(-0.2,0.2)) * this.alpha;
 
         this.alpha -= this.valpha;
 
@@ -234,8 +252,8 @@ class Player{
         if(playerInput.w.pressed ){ //&& Math.random()>0.2
             let x = this.x + this.w/2;
             let y = this.y + this.h/2;
-            x -= this.w/3 * Math.cos(this.rotation);
-            y -= this.w/3 * Math.sin(this.rotation);            
+            x -= this.w/2 * Math.cos(this.rotation);
+            y -= this.w/2 * Math.sin(this.rotation);            
             let p = new Particle(x,y,this.rotation);
             this.particles.push(p)
         }
