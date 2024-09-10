@@ -11,9 +11,6 @@ const SIZE = 55;
 let timePassed = 0, lastTime, fps;
 
 let mouse_points = [];
-let way_point;
-let paths = [];
-let paths_size = 0;
 let isMoving = false;
 
 document.addEventListener('contextmenu', event => {
@@ -21,13 +18,10 @@ document.addEventListener('contextmenu', event => {
   });
 
 canvas.addEventListener('mousedown',(event)=>{
-    
-    event.preventDefault();
     switch(event.button){
         case 0:
             mouse_points.push({x:event.clientX,y:event.clientY})
-            paths.push(mouse_points)
-            paths_size += 1;
+            player.paths.push(mouse_points)
             isMoving = true
             break;
         case 2:
@@ -36,13 +30,11 @@ canvas.addEventListener('mousedown',(event)=>{
     }
 })
 
-canvas.addEventListener('mouseup',(event)=>{
-    event.preventDefault();
+canvas.addEventListener('pointerup',(event)=>{
     switch(event.button){
         case 0:
             isMoving = false
             // console.log(mouse_points.length)
-            paths[paths_size-1] = mouse_points
             mouse_points = []
             break;
         case 2:
@@ -52,14 +44,13 @@ canvas.addEventListener('mouseup',(event)=>{
     
 })
 
-canvas.addEventListener('mousemove',(event)=>{
+canvas.addEventListener('pointermove',(event)=>{
     if(isMoving){
         mouse_points.push({x:event.clientX,y:event.clientY})
-        paths[paths_size-1] = mouse_points
     }
-    // y = event.clientY - player.y;
-    // x = event.clientX - player.x;
-    // player.rotation = Math.atan2(y,x);
+    y = event.clientY - player.y;
+    x = event.clientX - player.x;
+    player.rotation = Math.atan2(y,x);
 })
 
 function randomInt(min, max) {
@@ -69,6 +60,7 @@ function randomInt(min, max) {
 }
 
 function randomFloat(min, max, t=null) {
+    // lerp
     t = t ? t : Math.random();
     return (1.0-t)*min + t*max; 
 }
@@ -88,8 +80,7 @@ class Player{
         this.h = size;
         this.radius_collision = 8;
 
-        this.bullets = [];
-        this.particles = [];
+        this.paths = [];
     }
 
     draw(){
@@ -123,7 +114,12 @@ class Player{
         this.y = Math.max(this.radius_collision/4,
             Math.min(this.y,
                 canvas.height - 4*this.radius_collision)
-        )        
+        )
+        
+        if (this.paths.length > 10){
+            this.paths = this.paths.splice(-10,this.paths.length-1)
+        }
+
         this.draw();
     }
 }
@@ -146,7 +142,8 @@ const gameLoop = function(timeStamp){
     ctx.fillText("FPS: " + fps, 10, 20)
 
     player.draw()
-
+    let paths = player.paths
+    let paths_size = paths.length
     if(paths.length > 0){
         for(let j=0;j<paths.length;j++){
             let path = paths[j]
